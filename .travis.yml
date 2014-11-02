@@ -1,0 +1,20 @@
+language: go
+go:
+- 1.3
+env:
+- "PATH=/home/travis/gopath/bin:$PATH"
+before_install:
+- go get github.com/tools/godep
+script: make release
+deploy:
+  provider: releases
+  api_key:
+    secure: Z3qJZP3qYNPJ/Qk3sG+dPrd1ufy5/lUc27L8f/+sb5ruXpScQPszgkYeLD7Ro9sBO5iHlV6tz5pQFUrW/DzzntWiyrvlkz651ngA/Y1Kw0XtFdp1PYeIXAHQkcLWbfumyxgIVOyQ9JYLS2YxI3p7ZWcDb4GBlqBqTxurMYkYDD4=
+  file:
+  - release/registrator_darwin_x86_64.tgz
+  - release/registrator_linux_x86_64.tgz
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
+    repo: lalyos/registrator
