@@ -1,6 +1,6 @@
 NAME=registrator
 HARDWARE=$(shell uname -m)
-VERSION=0.4.0
+VERSION=0.4.1
 
 build:
 	docker build -t registrator .
