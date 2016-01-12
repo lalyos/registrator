@@ -105,6 +105,8 @@ func main() {
 		Cleanup:         *cleanup,
 	})
 
+	log.Println("=== INTERNAL: ===", *internal)
+
 	assert(err)
 
 	attempt := 0

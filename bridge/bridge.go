@@ -27,6 +27,8 @@ type Bridge struct {
 }
 
 func New(docker *dockerapi.Client, adapterUri string, config Config) (*Bridge, error) {
+
+	log.Println("=== bridge.New(): config.internal:", config.Internal)
 	uri, err := url.Parse(adapterUri)
 	if err != nil {
 		return nil, errors.New("bad adapter uri: " + adapterUri)
@@ -194,6 +196,8 @@ func (b *Bridge) add(containerId string, quiet bool) {
 	}
 
 	for _, port := range ports {
+		log.Printf("[HACK] checkoint port: %#v\n", port)
+		log.Println("b.config.Internal :", b.config.Internal)
 		if b.config.Internal != true && port.HostPort == "" {
 			if !quiet {
 				log.Println("ignored:", container.ID[:12], "port", port.ExposedPort, "not published on host")
@@ -201,6 +205,8 @@ func (b *Bridge) add(containerId string, quiet bool) {
 			continue
 		}
 		service := b.newService(port, len(ports) > 1)
+		log.Printf("[HACK] NEW SERVICE: %#v\n", service)
+
 		if service == nil {
 			if !quiet {
 				log.Println("ignored:", container.ID[:12], "service on port", port.ExposedPort)
@@ -220,7 +226,7 @@ func (b *Bridge) add(containerId string, quiet bool) {
 func (b *Bridge) newService(port ServicePort, isgroup bool) *Service {
 	container := port.container
 	defaultName := strings.Split(path.Base(container.Config.Image), ":")[0]
-	
+
 	// not sure about this logic. kind of want to remove it.
 	hostname := Hostname
 	if hostname == "" {
@@ -249,12 +255,14 @@ func (b *Bridge) newService(port ServicePort, isgroup bool) *Service {
 	service.ID = hostname + ":" + container.Name[1:] + ":" + port.ExposedPort
 	service.Name = mapDefault(metadata, "name", defaultName)
 	if isgroup && !metadataFromPort["name"] {
-		 service.Name += "-" + port.ExposedPort
+		service.Name += "-" + port.ExposedPort
 	}
 	var p int
 	if b.config.Internal == true {
+		log.Println("=== INTERNAL ===")
 		service.IP = port.ExposedIP
 		p, _ = strconv.Atoi(port.ExposedPort)
+		log.Println("   PORT=", p)
 	} else {
 		service.IP = port.HostIP
 		p, _ = strconv.Atoi(port.HostPort)
